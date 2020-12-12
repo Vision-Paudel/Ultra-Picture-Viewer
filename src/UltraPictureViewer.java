@@ -51,7 +51,7 @@ public class UltraPictureViewer extends Application {
 		
 		Pane colorPane = new Pane();
 		
-		Label lblBrightness = new Label("Brightness:");
+		Label lblBrightness = new Label("Brightness: 0.000");
 		lblBrightness.setLayoutX(0);
 		lblBrightness.setLayoutY(0);
 		colorPane.getChildren().add(lblBrightness);
@@ -69,10 +69,12 @@ public class UltraPictureViewer extends Application {
 	         public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
 	        	 colorAdjust.setBrightness((double)newValue);
 	        	 mainCanvas.setEffect(colorAdjust);
+	        	 String brightnessValue = String.format("%.3f", (double)newValue);
+	        	 lblBrightness.setText("Brightness: " + brightnessValue);
 	          }
 	    });
 		
-		Label lblContrast = new Label("Contrast:");
+		Label lblContrast = new Label("Contrast: 0.000");
 		lblContrast.setLayoutX(0);
 		lblContrast.setLayoutY(60);
 		colorPane.getChildren().add(lblContrast);
@@ -90,10 +92,12 @@ public class UltraPictureViewer extends Application {
 	         public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
 	        	 colorAdjust.setContrast((double)newValue);
 	        	 mainCanvas.setEffect(colorAdjust);
+	        	 String contrastValue = String.format("%.3f", (double)newValue);
+	        	 lblContrast.setText("Contrast: " + contrastValue);
 	          }
 	    });
 		
-		Label lblHue = new Label("Hue:");
+		Label lblHue = new Label("Hue: 0.000");
 		lblHue.setLayoutX(0);
 		lblHue.setLayoutY(120);
 		colorPane.getChildren().add(lblHue);
@@ -111,10 +115,12 @@ public class UltraPictureViewer extends Application {
 	         public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
 	        	 colorAdjust.setHue((double)newValue);
 	        	 mainCanvas.setEffect(colorAdjust);
+	        	 String hueValue = String.format("%.3f", (double)newValue);
+	        	 lblHue.setText("Hue: " + hueValue);
 	          }
 	    });
 		
-		Label lblSaturation = new Label("Saturation:");
+		Label lblSaturation = new Label("Saturation: 0.000");
 		lblSaturation.setLayoutX(0);
 		lblSaturation.setLayoutY(180);
 		colorPane.getChildren().add(lblSaturation);
@@ -132,6 +138,8 @@ public class UltraPictureViewer extends Application {
 	         public void changed(ObservableValue <?extends Number>observable, Number oldValue, Number newValue){
 	        	 colorAdjust.setSaturation((double)newValue);
 	        	 mainCanvas.setEffect(colorAdjust);
+	        	 String saturationValue = String.format("%.3f", (double)newValue);
+	        	 lblSaturation.setText("Saturation: " + saturationValue);
 	          }
 	    });
 		
@@ -143,12 +151,16 @@ public class UltraPictureViewer extends Application {
 		resetColorAdjust.setOnAction(e->{
 			colorAdjust.setBrightness(0);
 			sliderBrightness.setValue(0);
+			lblBrightness.setText("Brightness: 0.000");
 			colorAdjust.setContrast(0);
 			sliderContrast.setValue(0);
+			lblContrast.setText("Contrast: 0.000");
 			colorAdjust.setHue(0);
 			sliderHue.setValue(0);
+			lblHue.setText("Hue: 0.000");
 			colorAdjust.setSaturation(0);
 			sliderSaturation.setValue(0);
+			lblSaturation.setText("Saturation: 0.000");
 		});
 		
 		Label lblRotationAngle = new Label("Rotation Angle: 0");
