@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.io.IOException;
 
@@ -8,6 +9,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
@@ -22,17 +24,27 @@ import javafx.scene.control.Slider;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public class UltraPictureViewer extends Application {
 	
-	ColorAdjust colorAdjust = new ColorAdjust(); 
-			
+	ImageView mainCanvas = new ImageView();
+	ColorAdjust colorAdjust = new ColorAdjust();
+	Rectangle pixelColor = new Rectangle(140,50);
+	Label colorValue = new Label("Color: ");
+	
+	Label labelCoordinates = new Label("0, 0 px");
+	
+	
 	public static void main(String[] args) {
 		launch(args);		
 	}
@@ -43,8 +55,8 @@ public class UltraPictureViewer extends Application {
 		BorderPane mainPane = new BorderPane();
 		
 		ScrollPane mainCanvasHolder = new ScrollPane();
-		ImageView mainCanvas = new ImageView();
-		mainCanvasHolder.setContent(mainCanvas);
+		
+		mainCanvasHolder.setContent(new Group(mainCanvas));
 		mainCanvasHolder.setPrefSize(1024, 690);
 		mainCanvas.setCursor(Cursor.CROSSHAIR);
 		mainPane.setCenter(mainCanvasHolder);
@@ -261,24 +273,53 @@ public class UltraPictureViewer extends Application {
 		});
 		menuView.getItems().addAll(rotateRight, rotateLeft, zoomIn, zoomOut);
 		
+				
 		Menu menuHelp = new Menu("Help");
 		MenuItem about = new MenuItem("About Ultra Image-Viewer");
 		about.setOnAction(e -> {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("About Ultra Picture-Viewer");
 			alert.setHeaderText("Ultra Picure-Viewer");
-			alert.setContentText("Ultra Picture-Viewer is an image utility tool.\nThis is Ultra Picture-Viewer version 1.0.\nCreated by Vision Paudel.");
+			alert.setContentText("Ultra Picture-Viewer is an image utility tool.\nThis is Ultra Picture-Viewer version 1.2.\nCreated by Vision Paudel.");
 			alert.showAndWait();
 		});
 		menuHelp.getItems().addAll(about);
 			
 		menuBar.getMenus().addAll(menuFile, menuView, menuHelp);						
 		mainPane.setTop(menuBar);
-						
+	
+		colorValue.setLayoutX(0);
+		colorValue.setLayoutY(480);
+		colorPane.getChildren().add(colorValue);
+		
+		pixelColor.setLayoutX(0);
+		pixelColor.setLayoutY(500);
+		pixelColor.setStroke(Color.BLACK);
+		colorPane.getChildren().add(pixelColor);
+		
+		labelCoordinates.setLayoutX(5);
+		labelCoordinates.setLayoutY(560);
+		colorPane.getChildren().add(labelCoordinates);
+		mainCanvas.setOnMouseMoved(this::handleMove);
+                		
 		Scene mainScene = new Scene(mainPane, 1200, 720);
 		primaryStage.setScene(mainScene);
 		primaryStage.setTitle("Ultra Picture-Viewer");
 		primaryStage.setResizable(false);
 		primaryStage.show();
 	}		
+	
+	private void handleMove(MouseEvent e) {
+		
+		WritableImage newWritableImage = mainCanvas.snapshot(new SnapshotParameters(), null);
+		PixelReader newPixelReader = newWritableImage.getPixelReader();
+		Color colorAtCoordinate = newPixelReader.getColor((int)e.getX(), (int)e.getY());
+		
+		String xCoordinate = String.format("%.1f", e.getX());
+		String yCoordinate = String.format("%.1f", e.getY());
+		labelCoordinates.setText(xCoordinate + ", " + yCoordinate + " px");
+		colorValue.setText("Color: " + colorAtCoordinate);
+		pixelColor.setFill(colorAtCoordinate);
+    }
+	
 }
