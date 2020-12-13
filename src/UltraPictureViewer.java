@@ -1,6 +1,9 @@
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
@@ -25,6 +28,7 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -37,7 +41,7 @@ import javafx.stage.Stage;
 
 public class UltraPictureViewer extends Application {
 	
-	ImageView mainCanvas = new ImageView();
+	static ImageView mainCanvas = new ImageView();
 	ColorAdjust colorAdjust = new ColorAdjust();
 	Rectangle pixelColor = new Rectangle(140,50);
 	Label colorValue = new Label("Color: ");
@@ -196,20 +200,54 @@ public class UltraPictureViewer extends Application {
 			FileChooser fileChooser = new FileChooser();
 			 
 	        //Set extension filter for image files
-	        fileChooser.getExtensionFilters().add( new ExtensionFilter("Image Files (*.bmp, *.png, *.jpg, *.gif)", "*.bmp", "*.png", "*.jpg", "*.gif") );
+	        fileChooser.getExtensionFilters().addAll( 	new ExtensionFilter("Image Files (*.bmp, *.png, *.jpg, *.gif)", "*.bmp", "*.png", "*.jpg", "*.gif") ,  
+	        											new ExtensionFilter("Ultra Picture-Viewer Format File  (*.upvf)", "*.upvf") 	);
 	        
 	        //Show open file dialog
 	        File file = fileChooser.showOpenDialog(primaryStage);
-
+	       
+	        	
 	        if (file != null) {
-	        	Image image = new Image("file:///" + file.getPath());
-	        	mainCanvas.setRotate(0);
-	        	mainCanvas.setScaleX(1.0);
-				mainCanvas.setScaleY(1.0);
-				resetColorAdjust.fire();
-				lblRotationAngle.setText("Rotation Angle: 0");
-				lblZoomPercent.setText("Zoom Percent: 100%");
-	    		mainCanvas.setImage(image);
+	        	String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length());
+	        
+	        	if(!fileExtension.equals("upvf")) {
+		        	Image image = new Image("file:///" + file.getPath());
+		        	mainCanvas.setRotate(0);
+		        	mainCanvas.setScaleX(1.0);
+					mainCanvas.setScaleY(1.0);
+					resetColorAdjust.fire();
+					lblRotationAngle.setText("Rotation Angle: 0");
+					lblZoomPercent.setText("Zoom Percent: 100%");
+		    		mainCanvas.setImage(image);
+	        	}
+	        	else {
+	        		Scanner fileInput;
+					try {
+						fileInput = new Scanner(file);
+						String strWidth = fileInput.nextLine();
+		        		int width = Integer.parseInt(strWidth.substring( strWidth.lastIndexOf(":") + 1, strWidth.length() ) );
+		        		String strHeight = fileInput.nextLine();
+		        		int height = Integer.parseInt(strHeight.substring( strHeight.lastIndexOf(":") + 1, strHeight.length() ) );
+		        		WritableImage newWritableImage = new WritableImage(width, height);
+		        		PixelWriter newPixelWriter = newWritableImage.getPixelWriter();
+		        		
+		        		String[] newStringArray = new String[width];
+		        		
+		        		for(int i = 0; i < height; i++) {		        			
+		        			newStringArray = fileInput.nextLine().split(",");		        			
+		        			for(int j = 0; j < width; j++) {
+		        				Color c = Color.web(newStringArray[j].substring(newStringArray[j].length()-8, newStringArray[j].length()));
+		        				newPixelWriter.setColor(j, i, c);
+		        			}
+		        		}
+		        		mainCanvas.setImage(newWritableImage);
+		        		
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+	        		
+	        	}
 	        }
 		});
 		
@@ -219,7 +257,8 @@ public class UltraPictureViewer extends Application {
 			 
 	        //Set extension filter for image files
 	        fileChooser.getExtensionFilters().addAll( 	new ExtensionFilter("Portable Network Graphics File (*.png)", "*.png") ,	        			
-	        											new ExtensionFilter("Graphics Interchange Format File  (*.gif)", "*.gif") );
+	        											new ExtensionFilter("Graphics Interchange Format File  (*.gif)", "*.gif") , 
+	        											new ExtensionFilter("Ultra Picture-Viewer Format File  (*.upvf)", "*.upvf") 	);
 	        //Set title
 	        fileChooser.setTitle("Save as");
 	        
@@ -229,10 +268,30 @@ public class UltraPictureViewer extends Application {
 	        if (file != null) {
 	        	String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length());
 	        	try {
-	                ImageIO.write(SwingFXUtils.fromFXImage(newWritableImage, null), fileExtension, file);
+	        		if(!fileExtension.equals("upvf")) {
+	        			ImageIO.write(SwingFXUtils.fromFXImage(newWritableImage, null), fileExtension, file);
+	        		}
+	        		else {	        			
+	        			PrintWriter newPrintWriter = new PrintWriter(file);
+	        			int width = (int)newWritableImage.getWidth();
+	        			int height = (int)newWritableImage.getHeight();
+	        			newPrintWriter.println("width:" + width);
+	        			newPrintWriter.println("height:" + height);
+	        			PixelReader newPixelReader = newWritableImage.getPixelReader();
+	        			for(int i = 0; i < height; i++) {
+	        				for(int j = 0; j < width; j++) {
+	        					newPrintWriter.print(newPixelReader.getColor(j, i));
+	        					if(j < width -1) {
+	        						newPrintWriter.print(",");
+	        					}
+	        				}
+	        				newPrintWriter.println();
+	        			}
+	        			newPrintWriter.close();
+	        		}
 	            } catch (IOException ex) {
-	            	System.out.println(ex);
-	            }     
+	            	ex.printStackTrace();
+	            }
 	        }	        
 		});    
 				
@@ -241,19 +300,49 @@ public class UltraPictureViewer extends Application {
 			primaryStage.close();
 		});
 		menuFile.getItems().addAll(openFile, saveFile, exitApplication);
-						
+		
+		Menu menuEdit = new Menu("Edit");		
+		MenuItem crop = new MenuItem("Crop");
+		crop.setOnAction(e -> {
+			menuBar.setDisable(true);
+			
+			Pane cropPane = new Pane();
+			
+			Scene cropScene = new Scene(cropPane, 400, 200);
+			Stage cropStage = new Stage();
+			cropStage.setScene(cropScene);
+			cropStage.setTitle("Crop Settings");
+			cropStage.setResizable(false);
+			cropStage.show();
+			
+			Label toBeAdded = new Label("Will be Added Soon!");
+			toBeAdded.setLayoutX(125);
+			toBeAdded.setLayoutY(100);
+			cropPane.getChildren().add(toBeAdded);
+			
+			cropStage.setOnCloseRequest(ex->{
+				menuBar.setDisable(false);
+			});
+			
+		});
+		Menu menuEffects = new Menu("Effects");
+		MenuItem InvertColor = new MenuItem("Invert Color");
+		MenuItem SepiaTone = new MenuItem("Sepia Tone");
+		menuEffects.getItems().addAll(InvertColor, SepiaTone);
+		menuEdit.getItems().addAll(crop, menuEffects);
+		
 		Menu menuView = new Menu("View");
 		MenuItem rotateRight = new MenuItem("Rotate Right");
 		rotateRight.setOnAction(e -> {						
 			mainCanvas.setRotate(mainCanvas.getRotate() + 22.5);
-			if(mainCanvas.getRotate() > 337.5 )	
+			if(mainCanvas.getRotate() == 360 )	
 				mainCanvas.setRotate(0);
 			lblRotationAngle.setText("Rotation Angle: " + mainCanvas.getRotate());
 		});
 		MenuItem rotateLeft = new MenuItem("Rotate Left");
 		rotateLeft.setOnAction(e -> {
 			mainCanvas.setRotate(mainCanvas.getRotate() - 22.5);
-			if(mainCanvas.getRotate() < -337.5 )	
+			if(mainCanvas.getRotate() == -360 )	
 				mainCanvas.setRotate(0);
 			lblRotationAngle.setText("Rotation Angle: " + mainCanvas.getRotate());
 		});
@@ -280,14 +369,14 @@ public class UltraPictureViewer extends Application {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("About Ultra Picture-Viewer");
 			alert.setHeaderText("Ultra Picure-Viewer");
-			alert.setContentText("Ultra Picture-Viewer is an image utility tool.\nThis is Ultra Picture-Viewer version 1.2.\nCreated by Vision Paudel.");
+			alert.setContentText("Ultra Picture-Viewer is an image utility tool.\nThis is Ultra Picture-Viewer version 1.5.\nCreated by Vision Paudel.");
 			alert.showAndWait();
 		});
 		menuHelp.getItems().addAll(about);
 			
-		menuBar.getMenus().addAll(menuFile, menuView, menuHelp);						
+		menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuHelp);						
 		mainPane.setTop(menuBar);
-	
+		
 		colorValue.setLayoutX(0);
 		colorValue.setLayoutY(480);
 		colorPane.getChildren().add(colorValue);
@@ -301,7 +390,7 @@ public class UltraPictureViewer extends Application {
 		labelCoordinates.setLayoutY(560);
 		colorPane.getChildren().add(labelCoordinates);
 		mainCanvas.setOnMouseMoved(this::handleMove);
-                		
+        
 		Scene mainScene = new Scene(mainPane, 1200, 720);
 		primaryStage.setScene(mainScene);
 		primaryStage.setTitle("Ultra Picture-Viewer");
