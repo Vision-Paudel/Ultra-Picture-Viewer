@@ -24,7 +24,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.SepiaTone;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -35,6 +37,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -47,7 +50,7 @@ public class UltraPictureViewer extends Application {
 	Label colorValue = new Label("Color: ");
 	
 	Label labelCoordinates = new Label("0, 0 px");
-	
+	static int sepia = 0;
 	
 	public static void main(String[] args) {
 		launch(args);		
@@ -308,17 +311,111 @@ public class UltraPictureViewer extends Application {
 			
 			Pane cropPane = new Pane();
 			
-			Scene cropScene = new Scene(cropPane, 400, 200);
+			Scene cropScene = new Scene(cropPane, 400, 250);
 			Stage cropStage = new Stage();
 			cropStage.setScene(cropScene);
 			cropStage.setTitle("Crop Settings");
 			cropStage.setResizable(false);
 			cropStage.show();
 			
-			Label toBeAdded = new Label("Will be Added Soon!");
-			toBeAdded.setLayoutX(125);
-			toBeAdded.setLayoutY(100);
-			cropPane.getChildren().add(toBeAdded);
+			Label originX = new Label("Origin x-coordinate: ");
+			originX.setLayoutX(25);
+			originX.setLayoutY(20);
+			cropPane.getChildren().add(originX);
+			
+			TextField tfOrginX = new TextField();
+			tfOrginX.setLayoutX(180);
+			tfOrginX.setLayoutY(20);
+			cropPane.getChildren().add(tfOrginX);
+			
+			Label originY = new Label("Origin y-coordinate: ");
+			originY.setLayoutX(25);
+			originY.setLayoutY(60);
+			cropPane.getChildren().add(originY);
+			
+			TextField tfOrginY = new TextField();
+			tfOrginY.setLayoutX(180);
+			tfOrginY.setLayoutY(60);
+			cropPane.getChildren().add(tfOrginY);
+			
+			Label cropWidth = new Label("Crop Width: ");
+			cropWidth.setLayoutX(25);
+			cropWidth.setLayoutY(100);
+			cropPane.getChildren().add(cropWidth);
+			
+			TextField tfWidth = new TextField();
+			tfWidth.setLayoutX(180);
+			tfWidth.setLayoutY(100);
+			cropPane.getChildren().add(tfWidth);
+			
+			Label cropHeight = new Label("Crop Height: ");
+			cropHeight.setLayoutX(25);
+			cropHeight.setLayoutY(140);
+			cropPane.getChildren().add(cropHeight);
+			
+			TextField tfHeight = new TextField();
+			tfHeight.setLayoutX(180);
+			tfHeight.setLayoutY(140);
+			cropPane.getChildren().add(tfHeight);
+			
+			Button btnCrop = new Button("Crop");
+			btnCrop.setLayoutX(320);
+			btnCrop.setLayoutY(200);
+			cropPane.getChildren().add(btnCrop);
+			
+			Button btnCancel = new Button("Cancel");
+			btnCancel.setLayoutX(250);
+			btnCancel.setLayoutY(200);
+			cropPane.getChildren().add(btnCancel);
+			
+			btnCrop.setOnAction(ex->{
+				if (mainCanvas.getImage() == null) {
+					menuBar.setDisable(false);
+					cropStage.close();	
+				}else {
+					try {
+						int originXCoord = Integer.parseInt( tfOrginX.getText() );
+						int originYCoord = Integer.parseInt( tfOrginY.getText() );
+						int width = Integer.parseInt( tfWidth.getText() );
+						int height = Integer.parseInt( tfHeight.getText() );
+						WritableImage newWritableImage = mainCanvas.snapshot(new SnapshotParameters(), null);
+						
+						if((originXCoord > 0 ||  originXCoord < newWritableImage.getWidth()) && (originYCoord > 0 ||  originYCoord < newWritableImage.getHeight())) {
+							
+							if((originXCoord + width) > newWritableImage.getWidth())
+								width = (int) newWritableImage.getWidth();
+							
+							if((originXCoord + height) > newWritableImage.getHeight())
+								height = (int) newWritableImage.getHeight();
+							
+							PixelReader newPixelReader = newWritableImage.getPixelReader();
+							WritableImage newImage = new WritableImage(newPixelReader, originXCoord, originYCoord, width, height);
+							mainCanvas.setImage(newImage);
+							menuBar.setDisable(false);
+							cropStage.close();							
+						}else {
+							Alert alert = new Alert(AlertType.ERROR);
+							alert.setTitle("Error");
+							alert.setHeaderText("OutOfBounds");
+							alert.setContentText("Please enter a integer coordinate within bounds.");
+							alert.showAndWait();
+						}
+					}
+					catch(NumberFormatException exception) {
+						Alert alert = new Alert(AlertType.ERROR);
+						alert.setTitle("Error");
+						alert.setHeaderText("NumberFormatException");
+						alert.setContentText("Please enter a valid integer number.");
+						alert.showAndWait();
+					}
+				}
+				
+			});
+			
+			btnCancel.setOnAction(ex->{
+				menuBar.setDisable(false);
+				cropStage.close();
+			});
 			
 			cropStage.setOnCloseRequest(ex->{
 				menuBar.setDisable(false);
@@ -327,7 +424,36 @@ public class UltraPictureViewer extends Application {
 		});
 		Menu menuEffects = new Menu("Effects");
 		MenuItem InvertColor = new MenuItem("Invert Color");
+		InvertColor.setOnAction(e -> {
+			WritableImage newWritableImage = mainCanvas.snapshot(new SnapshotParameters(), null);
+			PixelReader newPixelReader = newWritableImage.getPixelReader();
+			PixelWriter newPixelWriter = newWritableImage.getPixelWriter();
+			int width = (int)newWritableImage.getWidth();
+			int height = (int)newWritableImage.getHeight();
+			for(int i = 0; i < height; i++) {
+				for(int j = 0; j < width; j++) {
+					newPixelWriter.setColor(j, i, newPixelReader.getColor(j, i).invert());					
+				}				
+			}
+			mainCanvas.setImage(newWritableImage);
+		});
+		
+		
 		MenuItem SepiaTone = new MenuItem("Sepia Tone");
+		
+		SepiaTone.setOnAction(e -> {
+			if (sepia == 0) {
+				SepiaTone sepiaTone = new SepiaTone(); 
+			    sepiaTone.setLevel(0.8); 
+			    mainCanvas.setEffect(sepiaTone); 
+			    sepia = 1;
+			}else {
+				SepiaTone sepiaTone = new SepiaTone(); 
+			    sepiaTone.setLevel(0); 
+			    mainCanvas.setEffect(sepiaTone); 
+			    sepia = 0;
+			}			    
+		});
 		menuEffects.getItems().addAll(InvertColor, SepiaTone);
 		menuEdit.getItems().addAll(crop, menuEffects);
 		
@@ -369,7 +495,7 @@ public class UltraPictureViewer extends Application {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("About Ultra Picture-Viewer");
 			alert.setHeaderText("Ultra Picure-Viewer");
-			alert.setContentText("Ultra Picture-Viewer is an image utility tool.\nThis is Ultra Picture-Viewer version 1.5.\nCreated by Vision Paudel.");
+			alert.setContentText("Ultra Picture-Viewer is an image utility tool.\nThis is Ultra Picture-Viewer version 1.9.\nCreated by Vision Paudel.");
 			alert.showAndWait();
 		});
 		menuHelp.getItems().addAll(about);
