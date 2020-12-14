@@ -37,7 +37,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -51,11 +50,11 @@ public class UltraPictureViewer extends Application {
 	
 	Label labelCoordinates = new Label("0, 0 px");
 	static int sepia = 0;
-	
+		
 	public static void main(String[] args) {
 		launch(args);		
 	}
-	
+		
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
@@ -383,17 +382,17 @@ public class UltraPictureViewer extends Application {
 						if((originXCoord > 0 ||  originXCoord < newWritableImage.getWidth()) && (originYCoord > 0 ||  originYCoord < newWritableImage.getHeight())) {
 							
 							if((originXCoord + width) > newWritableImage.getWidth())
-								width = (int) newWritableImage.getWidth();
+								width = (int) (newWritableImage.getWidth() - originXCoord);
 							
-							if((originXCoord + height) > newWritableImage.getHeight())
-								height = (int) newWritableImage.getHeight();
+							if((originYCoord + height) > newWritableImage.getHeight())
+								height = (int) (newWritableImage.getHeight() - originYCoord);
 							
 							PixelReader newPixelReader = newWritableImage.getPixelReader();
 							WritableImage newImage = new WritableImage(newPixelReader, originXCoord, originYCoord, width, height);
 							mainCanvas.setImage(newImage);
 							menuBar.setDisable(false);
 							cropStage.close();							
-						}else {
+						} else {
 							Alert alert = new Alert(AlertType.ERROR);
 							alert.setTitle("Error");
 							alert.setHeaderText("OutOfBounds");
@@ -487,8 +486,7 @@ public class UltraPictureViewer extends Application {
 			lblZoomPercent.setText("Zoom Percent: " + zoomPercentage + "%");
 		});
 		menuView.getItems().addAll(rotateRight, rotateLeft, zoomIn, zoomOut);
-		
-				
+						
 		Menu menuHelp = new Menu("Help");
 		MenuItem about = new MenuItem("About Ultra Image-Viewer");
 		about.setOnAction(e -> {
@@ -516,7 +514,7 @@ public class UltraPictureViewer extends Application {
 		labelCoordinates.setLayoutY(560);
 		colorPane.getChildren().add(labelCoordinates);
 		mainCanvas.setOnMouseMoved(this::handleMove);
-        
+        				
 		Scene mainScene = new Scene(mainPane, 1200, 720);
 		primaryStage.setScene(mainScene);
 		primaryStage.setTitle("Ultra Picture-Viewer");
