@@ -46,7 +46,7 @@ public class UltraPictureViewer extends Application {
 	static ImageView mainCanvas = new ImageView();
 	ColorAdjust colorAdjust = new ColorAdjust();
 	Rectangle pixelColor = new Rectangle(140,50);
-	Label colorValue = new Label("Color: ");
+	Label colorValue = new Label("Color: undefined");
 	
 	Label labelCoordinates = new Label("0, 0 px");
 	static int sepia = 0;
@@ -89,6 +89,7 @@ public class UltraPictureViewer extends Application {
 	        	 mainCanvas.setEffect(colorAdjust);
 	        	 String brightnessValue = String.format("%.3f", (double)newValue);
 	        	 lblBrightness.setText("Brightness: " + brightnessValue);
+	        	 sepia = 0;
 	          }
 	    });
 		
@@ -112,6 +113,7 @@ public class UltraPictureViewer extends Application {
 	        	 mainCanvas.setEffect(colorAdjust);
 	        	 String contrastValue = String.format("%.3f", (double)newValue);
 	        	 lblContrast.setText("Contrast: " + contrastValue);
+	        	 sepia = 0;
 	          }
 	    });
 		
@@ -135,6 +137,7 @@ public class UltraPictureViewer extends Application {
 	        	 mainCanvas.setEffect(colorAdjust);
 	        	 String hueValue = String.format("%.3f", (double)newValue);
 	        	 lblHue.setText("Hue: " + hueValue);
+	        	 sepia = 0;
 	          }
 	    });
 		
@@ -158,6 +161,7 @@ public class UltraPictureViewer extends Application {
 	        	 mainCanvas.setEffect(colorAdjust);
 	        	 String saturationValue = String.format("%.3f", (double)newValue);
 	        	 lblSaturation.setText("Saturation: " + saturationValue);
+	        	 sepia = 0;
 	          }
 	    });
 		
@@ -211,7 +215,11 @@ public class UltraPictureViewer extends Application {
 	        	
 	        if (file != null) {
 	        	String fileExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1, file.getName().length());
-	        
+	        	SepiaTone sepiaTone = new SepiaTone(); 
+			    sepiaTone.setLevel(0); 
+			    mainCanvas.setEffect(sepiaTone); 
+	        	sepia = 0;
+	        	
 	        	if(!fileExtension.equals("upvf")) {
 		        	Image image = new Image("file:///" + file.getPath());
 		        	mainCanvas.setRotate(0);
@@ -524,15 +532,25 @@ public class UltraPictureViewer extends Application {
 	
 	private void handleMove(MouseEvent e) {
 		
-		WritableImage newWritableImage = mainCanvas.snapshot(new SnapshotParameters(), null);
-		PixelReader newPixelReader = newWritableImage.getPixelReader();
-		Color colorAtCoordinate = newPixelReader.getColor((int)e.getX(), (int)e.getY());
+		if(mainCanvas.getScaleX()==1 && mainCanvas.getRotate()==0) {		
+			WritableImage newWritableImage = mainCanvas.snapshot(new SnapshotParameters(), null);
+			PixelReader newPixelReader = newWritableImage.getPixelReader();
+			Color colorAtCoordinate = newPixelReader.getColor((int)e.getX(), (int)e.getY());
+			
+			String xCoordinate = String.format("%.1f", e.getX());
+			String yCoordinate = String.format("%.1f", e.getY());
+			labelCoordinates.setText(xCoordinate + ", " + yCoordinate + " px");
+			colorValue.setText("Color: " + colorAtCoordinate);
+			pixelColor.setFill(colorAtCoordinate);
+		}
+		else {
+			String xCoordinate = String.format("%.1f", e.getX());
+			String yCoordinate = String.format("%.1f", e.getY());
+			labelCoordinates.setText(xCoordinate + ", " + yCoordinate + " px");
+			colorValue.setText("Color: undefined");
+			pixelColor.setFill(Color.BLACK);
+		}
 		
-		String xCoordinate = String.format("%.1f", e.getX());
-		String yCoordinate = String.format("%.1f", e.getY());
-		labelCoordinates.setText(xCoordinate + ", " + yCoordinate + " px");
-		colorValue.setText("Color: " + colorAtCoordinate);
-		pixelColor.setFill(colorAtCoordinate);
     }
 	
 }
