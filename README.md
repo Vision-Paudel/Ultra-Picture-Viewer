@@ -2,7 +2,7 @@
 
 Users can open BMP, PNG, JPEG, GIF file formats and make color adjustments to it.
 
-Users can save the changed image in PNG and GIF file formats.
+Users can save the changed image in PNG and GIF file formats. User can also save in .upv (Ultimate Picture-Viewer Format)
 
 Has color viewer based on px (Only works when not zoomed in or rotated). 
 
