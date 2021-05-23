@@ -4,7 +4,7 @@ Users can open BMP, PNG, JPEG, GIF file formats and make color adjustments to it
 
 Users can save the changed image in PNG and GIF file formats. 
 
-User can also save and open .upvf (Ultimate Picture-Viewer File Format) which is a text representation of each pixels and can be open by any text editor.
+User can also save and open .upvf (Ultimate Picture-Viewer File Format) which is a text representation of each pixels and can be open by almost any text editor.
 
 Has color viewer based on px (Only works when not zoomed in or rotated). 
 
