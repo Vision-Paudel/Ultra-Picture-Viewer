@@ -8,6 +8,8 @@ User can also save and open .upvf (Ultimate Picture-Viewer File Format) which is
 
 Has color viewer based on px (Only works when not zoomed in or rotated). 
 
-Has cropping feature based on coordinates with width and height. Has 2 effects. 
+Has cropping feature based on coordinates with width and height with Preview. Has 2 effects. 
+
+Has set transparent feature to make part of the image transparent based on RGB threshold or RGB specified range.
 
 <img src="https://github.com/Vision-Paudel/Ultra-Picture-Viewer/blob/main/Ultra%20Picture-Viewer%20ver.1.90.png" alt="Image could not be displayed">
