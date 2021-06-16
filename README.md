@@ -12,4 +12,4 @@ Has cropping feature based on coordinates with width and height with Preview. Ha
 
 Has set transparent feature to make part of the image transparent based on RGB threshold or RGB specified range.
 
-<img src="https://github.com/Vision-Paudel/Ultra-Picture-Viewer/blob/main/Ultra%20Picture-Viewer%20ver.1.90.png" alt="Image could not be displayed">
+<img src="https://github.com/Vision-Paudel/Ultra-Picture-Viewer/blob/main/Ultra%20Picture-Viewer%20ver.1.94.png" alt="Image could not be displayed">
