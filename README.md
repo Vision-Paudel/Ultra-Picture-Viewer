@@ -1,4 +1,4 @@
-# Ultra-Picture-Viewer
+# Ultra Picture Viewer
 
 Users can open BMP, PNG, JPEG, GIF file formats and make color adjustments to it.
 
