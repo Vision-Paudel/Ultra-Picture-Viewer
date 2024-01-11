@@ -1,5 +1,5 @@
 # Ultra Picture Viewer
-# Created with JDK 1.8
+## Created with JDK 1.8
 
 Users can open BMP, PNG, JPEG, GIF file formats and make color adjustments to it.
 
